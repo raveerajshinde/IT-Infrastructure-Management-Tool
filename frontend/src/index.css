@@ -1,0 +1,25 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    color-scheme: light;
+    /* default brand palette (overridden at runtime from Settings -> Branding) */
+    --brand-50: 238 244 255; --brand-100: 218 230 255; --brand-200: 188 210 255; --brand-300: 142 180 255; --brand-400: 89 139 255;
+    --brand-500: 53 99 245; --brand-600: 33 72 224; --brand-700: 27 57 181; --brand-800: 28 52 143; --brand-900: 28 47 113;
+  }
+  .dark { color-scheme: dark; }
+  body { font-feature-settings: "cv11", "ss01"; }
+  *:focus-visible { @apply outline-none ring-2 ring-brand-500 ring-offset-1 ring-offset-white dark:ring-offset-slate-950; }
+}
+
+@layer components {
+  .input { @apply block w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm shadow-sm placeholder:text-slate-400
+    focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500 disabled:cursor-not-allowed disabled:bg-slate-100
+    dark:border-slate-700 dark:bg-slate-900 dark:placeholder:text-slate-500 dark:disabled:bg-slate-800; }
+  .label { @apply mb-1 block text-xs font-medium uppercase tracking-wide text-slate-600 dark:text-slate-400; }
+  .code { @apply whitespace-pre-wrap break-all rounded-md bg-slate-900 p-3 font-mono text-xs leading-relaxed text-slate-100 dark:bg-black/60; }
+  .th { @apply px-3 py-2 text-left text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400; }
+  .td { @apply px-3 py-2.5 align-middle text-sm; }
+}

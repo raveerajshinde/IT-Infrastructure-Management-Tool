@@ -1,0 +1,41 @@
+#!/bin/bash
+# Stub docker for installer dry-runs. State in $STUB_STATE.
+S="${STUB_STATE:?}"; mkdir -p "$S/up"
+echo "docker $*" >>"$S/calls.log"
+args=("$@")
+if [[ "$1" == "compose" ]]; then
+  shift
+  [[ "$1" == "version" ]] && { [[ "${2:-}" == "--short" ]] && echo "2.31.0" || echo "Docker Compose version v2.31.0"; exit 0; }
+  # skip global opts (remember project dir)
+  while [[ "$1" == --project-directory || "$1" == -f || "$1" == --profile ]]; do [[ "$1" == --project-directory ]] && PD="$2"; shift 2; done
+  cmd="$1"; shift
+  case "$cmd" in
+    up) for a in "$@"; do [[ "$a" == -* ]] || touch "$S/up/$a"; done; touch "$S/volume_mssql";;
+    ps) svc="${@: -1}"; [[ -f "$S/up/$svc" ]] && echo "cid_$svc";;
+    stop|down|logs|pull|config|restart) [[ "$cmd" == logs ]] && echo "(stub logs)";;
+    exec) f=$(echo "$*" | grep -o "TO DISK = N'/var/opt/mssql/backup/[^']*'" | sed "s#.*/backup/##; s#'##")
+          [[ -n "$f" ]] && echo "BAK" >"$PD/backups/mssql/$f"; true;;
+    run)
+      line="$*"
+      if [[ "$line" == *create-admin* ]]; then read -r pw
+        if [[ -f "$S/admin" ]]; then echo "user admin already exists - left unchanged"; else echo "$pw" >"$S/admin"; echo "administrator admin created"; fi
+      elif [[ "$line" == *reset-admin-password* ]]; then read -r pw; echo "$pw" >"$S/admin"; echo "password reset"
+      elif [[ "$line" == *bootstrap-db* ]]; then [[ -n "${STUB_FAIL_DB:-}" ]] && { echo "login failed" >&2; exit 1; }; echo "database ready"
+      else echo "ok: $line"; fi;;
+    *) :;;
+  esac
+  exit 0
+fi
+case "$1" in
+  version) echo "27.3.1";;
+  inspect)
+    cid="${@: -1}"; svc="${cid#cid_}"
+    if [[ "$*" == *RestartCount* ]]; then echo 0
+    elif [[ "${STUB_EXIT:-}" == "$svc" ]]; then echo exited
+    elif [[ "$*" == *State.Status* && "$*" == */* ]]; then echo "running/healthy"
+    else echo healthy; fi;;
+  volume) [[ "$2" == inspect ]] && { [[ -f "$S/volume_mssql" ]] && exit 0 || exit 1; };;
+  image|build|pull|load|ps|rm) :;;
+  *) :;;
+esac
+exit 0

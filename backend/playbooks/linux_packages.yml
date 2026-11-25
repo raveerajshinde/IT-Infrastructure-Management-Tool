@@ -1,0 +1,16 @@
+---
+# Install / update / remove packages on Linux servers (apt, dnf, yum, zypper via ansible.builtin.package)
+- name: Manage packages
+  hosts: all
+  become: true
+  gather_facts: true
+  tasks:
+    - name: Refresh APT cache
+      ansible.builtin.apt:
+        update_cache: true
+        cache_valid_time: 3600
+      when: ansible_facts.pkg_mgr == 'apt'
+    - name: Ensure packages are {{ state }}
+      ansible.builtin.package:
+        name: "{{ packages }}"
+        state: "{{ state }}"

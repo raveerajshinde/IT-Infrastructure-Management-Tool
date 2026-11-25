@@ -1,0 +1,26 @@
+# Runtime dependencies for InfraPilot API + worker (pinned; versions verified by the test suite on Python 3.13)
+fastapi==0.162.5
+starlette==1.7.0
+uvicorn[standard]==0.54.0
+pydantic==2.13.5
+pydantic-settings==2.16.2
+SQLAlchemy==2.1.8
+alembic==1.20.1
+pyodbc==5.2.0
+cryptography==50.0.1
+bcrypt==5.0.0
+pyotp==2.10.0
+qrcode[pil]==8.2
+ldap3==2.9.1
+httpx==0.28.1
+paramiko==5.1.0
+netmiko==4.8.0
+pypsrp==0.9.1
+smbprotocol==1.17.0
+pysnmp==7.1.32
+ansible==12.3.0  # bundles ansible-core 2.19 + ansible.windows, community.windows, ansible.posix, community.general
+ansible-runner==2.4.3
+pywinrm==0.5.0
+openpyxl==3.1.5
+reportlab==4.4.4  # PDF reports (GPO, audit, report center)
+python-multipart==0.0.32

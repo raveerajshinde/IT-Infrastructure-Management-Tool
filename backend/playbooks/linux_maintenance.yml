@@ -1,0 +1,43 @@
+---
+- name: Linux maintenance
+  hosts: all
+  become: true
+  gather_facts: true
+  tasks:
+    - name: Refresh package metadata (APT)
+      ansible.builtin.apt:
+        update_cache: true
+      when: ansible_facts.pkg_mgr == 'apt'
+    - name: Upgrade all packages (APT)
+      ansible.builtin.apt:
+        upgrade: safe
+      when: ansible_facts.pkg_mgr == 'apt' and upgrade | bool
+    - name: Upgrade all packages (DNF/YUM)
+      ansible.builtin.dnf:
+        name: "*"
+        state: latest
+      when: ansible_facts.pkg_mgr in ['dnf', 'dnf5', 'yum'] and upgrade | bool
+    - name: Remove unused dependencies (APT)
+      ansible.builtin.apt:
+        autoremove: true
+      when: ansible_facts.pkg_mgr == 'apt' and autoremove | bool
+    - name: Rotate journal to 14 days
+      ansible.builtin.command: journalctl --vacuum-time=14d
+      changed_when: false
+    - name: Check whether a reboot is required (Debian/Ubuntu)
+      ansible.builtin.stat:
+        path: /var/run/reboot-required
+      register: rr
+    - name: Check whether a reboot is required (RHEL)
+      ansible.builtin.command: needs-restarting -r
+      register: nr
+      failed_when: false
+      changed_when: false
+      when: ansible_facts.os_family == 'RedHat'
+    - name: Report reboot requirement
+      ansible.builtin.debug:
+        msg: "Reboot required: {{ (rr.stat.exists | default(false)) or (nr.rc | default(0) == 1) }}"
+    - name: Reboot if required and allowed
+      ansible.builtin.reboot:
+        reboot_timeout: 900
+      when: reboot_if_required | bool and ((rr.stat.exists | default(false)) or (nr.rc | default(0) == 1))

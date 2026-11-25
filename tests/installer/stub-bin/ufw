@@ -1,0 +1,4 @@
+#!/bin/bash
+echo "ufw $*" >>"$STUB_STATE/calls.log"
+[[ -n "${STUB_UFW_FAIL:-}" && "$1" != status ]] && { echo "ERROR: problem running iptables" >&2; exit 1; }
+[[ "$1" == status ]] && echo "Status: inactive"; exit 0

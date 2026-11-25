@@ -1,0 +1,14 @@
+---
+- name: Restart a Windows service
+  hosts: all
+  gather_facts: false
+  tasks:
+    - name: Restart {{ service_name }}
+      ansible.windows.win_service:
+        name: "{{ service_name }}"
+        state: restarted
+      register: svc
+    - name: Verify running
+      ansible.builtin.assert:
+        that: svc.state == 'running'
+        fail_msg: "Service {{ service_name }} is {{ svc.state }} after restart"

@@ -1,0 +1,2 @@
+#!/bin/bash
+echo "dpkg $*" >>"$STUB_STATE/calls.log"; exit 0

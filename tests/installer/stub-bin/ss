@@ -1,0 +1,5 @@
+#!/bin/bash
+# ss -ltnH "sport = :PORT"
+port=$(echo "$*" | grep -o 'sport = :[0-9]*' | cut -d: -f2)
+for b in ${STUB_BUSY:-}; do [[ "$b" == "$port" ]] && { echo "LISTEN 0 511 0.0.0.0:$port 0.0.0.0:* users:((\"nginx\",pid=1,fd=6))"; exit 0; }; done
+exit 0

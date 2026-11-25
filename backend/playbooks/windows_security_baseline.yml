@@ -1,0 +1,22 @@
+---
+- name: Windows security baseline
+  hosts: all
+  gather_facts: false
+  tasks:
+    - name: Disable SMBv1 server
+      ansible.windows.win_powershell:
+        script: |
+          $c = Get-SmbServerConfiguration
+          if ($c.EnableSMB1Protocol) { Set-SmbServerConfiguration -EnableSMB1Protocol $false -Force; $Ansible.Changed = $true } else { $Ansible.Changed = $false }
+      when: disable_smb1 | bool
+    - name: Enable Windows Firewall on all profiles
+      community.windows.win_firewall:
+        state: enabled
+        profiles: [Domain, Private, Public]
+      when: enable_firewall | bool
+    - name: Audit logon events (success and failure)
+      ansible.windows.win_powershell:
+        script: |
+          auditpol.exe /set /subcategory:"Logon" /success:enable /failure:enable | Out-Null
+          $Ansible.Changed = $true
+      when: audit_logon_events | bool
